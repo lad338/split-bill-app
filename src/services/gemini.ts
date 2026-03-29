@@ -48,7 +48,8 @@ export async function analyzeWithGemini(imageData: string): Promise<AnalysisResu
     }],
   })
 
-  const raw = result.text  // .text is a getter (string), not a method, in @google/genai
+  const raw = result.text  // .text is a getter (string | undefined), not a method, in @google/genai
+  if (!raw) throw new Error('No text in AI response')
 
   // Strip optional markdown code fences (e.g. ```json ... ```)
   const text = raw.replace(/^```(?:json)?\s*\n?/, '').replace(/\n?```\s*$/, '').trim()
