@@ -2,12 +2,12 @@ import { nanoid } from 'nanoid'
 import type { Receipt, Settlement } from '../types'
 
 export function calculateSettlements(receipt: Receipt): Settlement[] {
-  const { items, paidBy, settlements: existing, tax = 0, tips = 0 } = receipt
+  const { items, paidBy, settlements: existing, tax = 0, tips = 0, discount = 0 } = receipt
 
   if (!paidBy) return []
 
   const subtotal = items.reduce((sum, i) => sum + i.price, 0)
-  const multiplier = subtotal > 0 ? 1 + (tax + tips) / subtotal : 1
+  const multiplier = subtotal > 0 ? 1 + (tax + tips - discount) / subtotal : 1
 
   const owedMap: Record<string, number> = {}
   for (const item of items) {

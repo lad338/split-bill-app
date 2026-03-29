@@ -6,6 +6,7 @@ import BalanceRow from './BalanceRow'
 import SharePanel from './SharePanel'
 import './BalanceSection.css'
 import type { Receipt } from '../../types'
+import { parsePrice } from '../../utils/price'
 
 interface BalanceSectionProps {
   receipt: Receipt
@@ -30,13 +31,16 @@ const inputSx = {
 export default function BalanceSection({ receipt, onChange }: BalanceSectionProps) {
   const settlements = useMemo(() => calculateSettlements(receipt), [receipt])
 
-  const [taxValue, setTaxValue] = useState(String(receipt.tax ?? 0))
-  const [tipsValue, setTipsValue] = useState(String(receipt.tips ?? 0))
+  const [taxValue, setTaxValue] = useState(receipt.tax ? String(receipt.tax): undefined)
+  const [tipsValue, setTipsValue] = useState(receipt.tips ? String(receipt.tips) : undefined)
+  const [discountValue, setDiscountValue] = useState(receipt.discount ? String(receipt.discount) : undefined)
   const taxDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const tipsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const discountDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => { setTaxValue(String(receipt.tax ?? 0)) }, [receipt.tax])
   useEffect(() => { setTipsValue(String(receipt.tips ?? 0)) }, [receipt.tips])
+  useEffect(() => { setDiscountValue(String(receipt.discount ?? 0)) }, [receipt.discount])
 
   if (!isBalanceReady(receipt)) {
     const message = !receipt.paidBy
@@ -53,7 +57,7 @@ export default function BalanceSection({ receipt, onChange }: BalanceSectionProp
     setTipsValue(value)
     if (tipsDebounceRef.current) clearTimeout(tipsDebounceRef.current)
     tipsDebounceRef.current = setTimeout(() => {
-      const num = parseFloat(value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')) || 0
+      const num = parsePrice(value)
       onChange({ ...receipt, tips: num })
     }, 300)
   }
@@ -62,8 +66,17 @@ export default function BalanceSection({ receipt, onChange }: BalanceSectionProp
     setTaxValue(value)
     if (taxDebounceRef.current) clearTimeout(taxDebounceRef.current)
     taxDebounceRef.current = setTimeout(() => {
-      const num = parseFloat(value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')) || 0
+      const num = parsePrice(value)
       onChange({ ...receipt, tax: num })
+    }, 300)
+  }
+
+  function handleDiscountChange(value: string) {
+    setDiscountValue(value)
+    if (discountDebounceRef.current) clearTimeout(discountDebounceRef.current)
+    discountDebounceRef.current = setTimeout(() => {
+      const num = parsePrice(value)
+      onChange({ ...receipt, discount: num })
     }, 300)
   }
 
@@ -86,6 +99,16 @@ export default function BalanceSection({ receipt, onChange }: BalanceSectionProp
           value={tipsValue}
           onChange={e => handleTipsChange(e.target.value)}
           inputProps={{ inputMode: 'decimal', step: '0.01', 'aria-label': 'Tips amount' }}
+          InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
+          size="small"
+          sx={inputSx}
+        />
+        <TextField
+          variant="standard"
+          label="Discount"
+          value={discountValue}
+          onChange={e => handleDiscountChange(e.target.value)}
+          inputProps={{ inputMode: 'decimal', step: '0.01', 'aria-label': 'Discount amount' }}
           InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
           size="small"
           sx={inputSx}

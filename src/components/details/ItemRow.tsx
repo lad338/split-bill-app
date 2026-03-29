@@ -12,7 +12,7 @@ import { equalSplit } from '../../utils/shareUtils'
 import { useToast } from '../../hooks/useToast'
 import './ItemRow.css'
 import type { ReceiptItem, Person } from '../../types'
-import { getFormattedPrice } from '../../utils/price'
+import { formatPriceInput, getFormattedPrice } from '../../utils/price'
 
 interface ItemRowProps {
   item: ReceiptItem
@@ -43,6 +43,11 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
   }, [item, isExpanded])
 
   function handleExpand() {
+    if (!people.length) {
+      showToast('Please add participants first', 'warning')
+      return
+    }
+
     setDraft(item)
     setPriceStr(item.price.toFixed(2))
     setIsExpanded(true)
@@ -121,7 +126,7 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
             variant="standard"
             placeholder="0.00"
             value={priceStr}
-            onChange={e => setPriceStr(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'))}
+            onChange={e => setPriceStr(formatPriceInput(e.target.value))}
             inputProps={{ inputMode: 'decimal', step: '0.01', 'aria-label': 'Item price', style: { textAlign: 'right', width: 60 } }}
             InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
             size="small"

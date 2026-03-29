@@ -69,7 +69,7 @@ function ShareRow({ person, percentage, onUpdate, onSetFull, onToggle }: ShareRo
             inputMode: 'decimal',
             step: '0.01',
             'aria-label': `${person.name} percentage`,
-            style: { textAlign: 'right', width: 36 },
+            style: { textAlign: 'right', width: 40 },
           }}
           InputProps={{
             endAdornment: <InputAdornment position="end" sx={{ '& p': { color: 'var(--color-text-muted)', fontSize: 'var(--font-size-base)' } }}>%</InputAdornment>,

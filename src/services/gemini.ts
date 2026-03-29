@@ -17,15 +17,19 @@ If a valid receipt is found, return:
   "date": "<YYYY-MM-DD or null>",
   "items": [
     { "name": "<item name>", "price": <number> }
-  ]
+  ],
+  "tax": <number>,
+  "tips": <number>,
+  "discount": <number>
 }
 
 Rules:
 - Include only individual line items. Exclude subtotals and totals.
-- Tax and tips should be separated item entries.
 - Skip any items with a price of $0.
+- Tax, tips and whole-bill discount should are separated.
 - Prices are positive numbers. If there is a discount, return the discounted price as the item price, not the original price.
-- For items with add-ons or modifiers (e.g. extra meat, extra sauce): either combine into one entry with the total price, or list each as a separate entry with its individual price — whichever is clearer given the receipt layout.
+- For items with add-ons or modifiers (e.g. extra sauce): either combine into one entry with the total price, or list each as a separate entry with its individual price — whichever is clearer given the receipt layout.
+- Ignore items that are not clear.
 - If you cannot read the receipt or no receipt is present, return: { "error": "<reason>" }`
 
 export async function analyzeWithGemini(imageData: string): Promise<AnalysisResult> {

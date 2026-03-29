@@ -9,6 +9,7 @@ import ItemRow from './ItemRow'
 import { useToast } from '../../hooks/useToast'
 import './ItemsSection.css'
 import type { Receipt, ReceiptItem, Person } from '../../types'
+import { formatPriceInput } from '../../utils/price'
 
 interface AddItemFormProps {
   people: Person[]
@@ -47,7 +48,7 @@ function AddItemForm({ people: _people, onSubmit }: AddItemFormProps) {
         variant="standard"
         placeholder="0.00"
         value={price}
-        onChange={e => setPrice(e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1'))}
+        onChange={e => setPrice(formatPriceInput(e.target.value))}
         inputProps={{ inputMode: 'decimal', step: '0.01', 'aria-label': 'New item price', style: { textAlign: 'right', width: 60 } }}
         InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
         size="small"

@@ -34,6 +34,7 @@ export interface Receipt {
   paidBy?: string          // personId of whoever paid the full receipt; undefined if not yet set
   tax?: number              // dollar amount added to bill; default 0
   tips?: number             // dollar amount added to bill; default 0
+  discount?: number         // dollar amount subtracted from bill; default 0
   people: Person[]
   items: ReceiptItem[]
   settlements: Settlement[]
