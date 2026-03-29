@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import { calculateSettlements } from '../../services/balance'
@@ -30,6 +30,14 @@ const inputSx = {
 export default function BalanceSection({ receipt, onChange }: BalanceSectionProps) {
   const settlements = useMemo(() => calculateSettlements(receipt), [receipt])
 
+  const [taxValue, setTaxValue] = useState(String(receipt.tax ?? 0))
+  const [tipsValue, setTipsValue] = useState(String(receipt.tips ?? 0))
+  const taxDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const tipsDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => { setTaxValue(String(receipt.tax ?? 0)) }, [receipt.tax])
+  useEffect(() => { setTipsValue(String(receipt.tips ?? 0)) }, [receipt.tips])
+
   if (!isBalanceReady(receipt)) {
     const message = !receipt.paidBy
       ? 'Please set who paid in full and assign all item shares.'
@@ -42,13 +50,21 @@ export default function BalanceSection({ receipt, onChange }: BalanceSectionProp
   }
 
   function handleTipsChange(value: string) {
-    const num = parseFloat(value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')) || 0
-    onChange({ ...receipt, tips: num })
+    setTipsValue(value)
+    if (tipsDebounceRef.current) clearTimeout(tipsDebounceRef.current)
+    tipsDebounceRef.current = setTimeout(() => {
+      const num = parseFloat(value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')) || 0
+      onChange({ ...receipt, tips: num })
+    }, 300)
   }
 
   function handleTaxChange(value: string) {
-    const num = parseFloat(value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')) || 0
-    onChange({ ...receipt, tax: num })
+    setTaxValue(value)
+    if (taxDebounceRef.current) clearTimeout(taxDebounceRef.current)
+    taxDebounceRef.current = setTimeout(() => {
+      const num = parseFloat(value.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1')) || 0
+      onChange({ ...receipt, tax: num })
+    }, 300)
   }
 
   return (
@@ -57,9 +73,9 @@ export default function BalanceSection({ receipt, onChange }: BalanceSectionProp
         <TextField
           variant="standard"
           label="Tax"
-          value={receipt.tax ?? 0}
+          value={taxValue}
           onChange={e => handleTaxChange(e.target.value)}
-          inputProps={{ inputMode: 'decimal', 'aria-label': 'Tax amount' }}
+          inputProps={{ inputMode: 'decimal', step: '0.01', 'aria-label': 'Tax amount' }}
           InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
           size="small"
           sx={inputSx}
@@ -67,9 +83,9 @@ export default function BalanceSection({ receipt, onChange }: BalanceSectionProp
         <TextField
           variant="standard"
           label="Tips"
-          value={receipt.tips ?? 0}
+          value={tipsValue}
           onChange={e => handleTipsChange(e.target.value)}
-          inputProps={{ inputMode: 'decimal', 'aria-label': 'Tips amount' }}
+          inputProps={{ inputMode: 'decimal', step: '0.01', 'aria-label': 'Tips amount' }}
           InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
           size="small"
           sx={inputSx}
