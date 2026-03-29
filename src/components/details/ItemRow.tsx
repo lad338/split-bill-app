@@ -2,16 +2,17 @@ import { useState, useEffect } from 'react'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
-import EditIcon from '@mui/icons-material/Edit'
 import CheckIcon from '@mui/icons-material/Check'
 import CloseIcon from '@mui/icons-material/Close'
 import DeleteIcon from '@mui/icons-material/Delete'
-import CallSplitIcon from '@mui/icons-material/CallSplit'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import RestoreIcon from '@mui/icons-material/Restore';
 import ShareTable from './ShareTable'
 import { equalSplit } from '../../utils/shareUtils'
 import { useToast } from '../../hooks/useToast'
 import './ItemRow.css'
 import type { ReceiptItem, Person } from '../../types'
+import { getFormattedPrice } from '../../utils/price'
 
 interface ItemRowProps {
   item: ReceiptItem
@@ -41,7 +42,7 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
     }
   }, [item, isExpanded])
 
-  function handleEdit() {
+  function handleExpand() {
     setDraft(item)
     setPriceStr(item.price.toFixed(2))
     setIsExpanded(true)
@@ -49,19 +50,20 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
     onEditStart(item.id)
   }
 
-  function handleSave() {
+  function handleCollapse() {
+    if (!canSave) {
+      showToast('Update price and shares before closing', 'warning')
+      return
+    }
     onChange({ ...draft, price: parseFloat(priceStr) })
     setIsExpanded(false)
     onEditEnd()
     showToast('Changes saved')
   }
 
-  function handleCancel() {
+  function handleReset() {
     setDraft(item)
-    setPriceStr('')
-    setIsExpanded(false)
-    setShowDeleteConfirm(false)
-    onEditEnd()
+    setPriceStr(getFormattedPrice(item.price) || '')
   }
 
   function handleEqualSplit() {
@@ -73,23 +75,32 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
 
   if (!isExpanded) {
     return (
-      <div className="item-row">
+      <button
+        className={`item-row item-row--collapsed${anotherIsEditing ? ' item-row--disabled' : ''}`}
+        onClick={anotherIsEditing ? undefined : handleExpand}
+        disabled={anotherIsEditing}
+        aria-label={`Edit ${item.name}`}
+      >
         <span className="item-row-name">{item.name}</span>
         <div className="item-row-right">
-          <span className={`item-row-price${priceClassName ? ' ' + priceClassName : ''}`}>${item.price.toFixed(2)}</span>
-          <IconButton
-            size="small"
-            aria-label="Edit item"
-            onClick={handleEdit}
-            disabled={anotherIsEditing}
-            className="item-icon-btn"
-          >
-            <EditIcon fontSize="small" />
-          </IconButton>
+          <span className={`item-row-price${priceClassName ? ' ' + priceClassName : ''}`}>{getFormattedPrice(item.price)}</span>
+          <ExpandMoreIcon fontSize="small" className="item-row-chevron" sx={{ color: 'var(--color-text-muted)' }} />
         </div>
-      </div>
+      </button>
     )
   }
+
+  const inputSx = {
+    '& .MuiInput-underline:before': { borderBottomColor: 'var(--color-border)' },
+    '& .MuiInput-underline:after': { borderBottomColor: 'var(--color-accent)' },
+    '& .MuiInputBase-input': {
+      color: 'var(--color-text)',
+      fontSize: 'var(--font-size-base)',
+      fontWeight: 500,
+      fontFamily: 'inherit',
+      padding: '4px 0',
+    },
+  };
 
   return (
     <div className="item-row item-row--expanded">
@@ -102,15 +113,7 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
           size="small"
           sx={{
             flex: 1,
-            '& .MuiInput-underline:before': { borderBottomColor: 'var(--color-border)' },
-            '& .MuiInput-underline:after': { borderBottomColor: 'var(--color-accent)' },
-            '& .MuiInputBase-input': {
-              color: 'var(--color-text)',
-              fontSize: 'var(--font-size-base)',
-              fontWeight: 500,
-              fontFamily: 'inherit',
-              padding: '4px 0',
-            },
+            ...inputSx
           }}
         />
         <div className="item-row-right">
@@ -122,20 +125,10 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
             inputProps={{ inputMode: 'decimal', step: '0.01', 'aria-label': 'Item price', style: { textAlign: 'right', width: 60 } }}
             InputProps={{ startAdornment: <InputAdornment position="start">$</InputAdornment> }}
             size="small"
-            sx={{
-              '& .MuiInput-underline:before': { borderBottomColor: 'var(--color-border)' },
-              '& .MuiInput-underline:after': { borderBottomColor: 'var(--color-accent)' },
-              '& .MuiInputBase-input': { color: 'var(--color-text)', fontSize: 'var(--font-size-base)', fontFamily: 'inherit' },
-            }}
+            sx={inputSx}
           />
-          <IconButton
-            size="small"
-            aria-label="Equal split"
-            onClick={handleEqualSplit}
-            disabled={people.length === 0}
-            className="item-icon-btn"
-          >
-            <CallSplitIcon fontSize="small" />
+          <IconButton size="small" aria-label="Collapse item" onClick={handleCollapse} className="item-icon-btn">
+            <ExpandMoreIcon fontSize="small" sx={{ transform: 'rotate(180deg)' }} />
           </IconButton>
         </div>
       </div>
@@ -145,6 +138,7 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
           people={people}
           shares={draft.shares}
           onChange={shares => setDraft({ ...draft, shares })}
+          onEqualSplit={handleEqualSplit}
         />
 
         {showDeleteConfirm ? (
@@ -163,11 +157,8 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
               <DeleteIcon fontSize="small" />
             </IconButton>
             <div className="item-row-actions-right">
-              <IconButton size="small" aria-label="Cancel" onClick={handleCancel} className="item-icon-btn">
-                <CloseIcon fontSize="small" />
-              </IconButton>
-              <IconButton size="small" aria-label="Save" onClick={handleSave} disabled={!canSave} className="item-icon-btn item-icon-btn--save">
-                <CheckIcon fontSize="small" />
+              <IconButton size="small" aria-label="Reset item" onClick={handleReset} className="item-icon-btn">
+                <RestoreIcon fontSize="small" />
               </IconButton>
             </div>
           </div>

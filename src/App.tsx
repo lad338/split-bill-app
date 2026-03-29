@@ -29,7 +29,7 @@ export default function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <ToastProvider>
-      <BrowserRouter basename="/split-bill-app">
+      <BrowserRouter basename="/split-bill">
         <Routes>
           <Route path="/" element={<ListPage />} />
           <Route path="/add" element={<AddPage />} />

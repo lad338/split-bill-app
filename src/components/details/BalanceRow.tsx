@@ -1,5 +1,6 @@
 import './BalanceRow.css'
 import type { Settlement, Person } from '../../types'
+import { getFormattedPrice } from '../../utils/price'
 
 interface BalanceRowProps {
   settlement: Settlement
@@ -15,7 +16,7 @@ export default function BalanceRow({ settlement, people }: BalanceRowProps) {
   return (
     <div className="balance-row">
       <span className="balance-row-label">{from} owes {to}</span>
-      <span className="balance-row-amount">${settlement.amount.toFixed(2)}</span>
+      <span className="balance-row-amount">{getFormattedPrice(settlement.amount)}</span>
     </div>
   )
 }

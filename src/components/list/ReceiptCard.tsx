@@ -3,6 +3,7 @@ import Chip from '@mui/material/Chip'
 import dayjs from 'dayjs'
 import './ReceiptCard.css'
 import type { Receipt } from '../../types'
+import { getFinalPrice, getFormattedPrice } from '../../utils/price'
 
 interface ReceiptCardProps {
   receipt: Receipt
@@ -12,7 +13,6 @@ interface ReceiptCardProps {
 export default function ReceiptCard({ receipt, onClick }: ReceiptCardProps) {
   const dateTs = receipt.date ?? receipt.createdAt
   const dateStr = dayjs(dateTs).format('YYYY/MM/DD')
-  const total = receipt.items.reduce((sum, item) => sum + item.price, 0)
   const names = receipt.people.map(p => p.name)
 
   const chipsRef = useRef<HTMLDivElement>(null)
@@ -44,7 +44,7 @@ export default function ReceiptCard({ receipt, onClick }: ReceiptCardProps) {
       <div className="receipt-card-main">
         <div className="receipt-card-row1">
           <span className="receipt-card-title">{receipt.title || 'Untitled Receipt'}</span>
-          <span className="receipt-card-total">${total.toFixed(2)}</span>
+          <span className="receipt-card-total">{getFormattedPrice(getFinalPrice(receipt))}</span>
         </div>
         <div className="receipt-card-meta">
           {dateStr} · {names.length} {names.length === 1 ? 'person' : 'people'}

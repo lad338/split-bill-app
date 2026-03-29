@@ -12,13 +12,13 @@ import { getReceipt, saveReceipt } from '../services/storage'
 import { useToast } from '../hooks/useToast'
 import PageHeader from '../components/common/PageHeader'
 import PageContent from '../components/common/PageContent'
+import CollapsibleSection from '../components/details/CollapsibleSection'
 import ParticipantsSection from '../components/details/ParticipantsSection'
 import ItemsSection from '../components/details/ItemsSection'
-import BalanceTab from '../components/details/BalanceTab'
+import BalanceSection from '../components/details/BalanceSection'
 import type { Receipt } from '../types'
 import './DetailsPage.css'
-
-type Tab = 'items' | 'balance'
+import { getFinalPrice, getFormattedPrice, getTotalItemPrice } from '../utils/price'
 
 function isBalanceReady(receipt: Receipt): boolean {
   if (!receipt.paidBy) return false
@@ -34,15 +34,15 @@ export default function DetailsPage() {
   const navigate = useNavigate()
   const { showToast } = useToast()
   const [receipt, setReceipt] = useState<Receipt | null>(null)
-  const [activeTab, setActiveTab] = useState<Tab>('items')
   const [confirmingDelete, setConfirmingDelete] = useState(false)
   const [highlightErrors, setHighlightErrors] = useState(false)
 
-  // Title editing
+  const [participantsExpanded, setParticipantsExpanded] = useState(true)
+  const [itemsExpanded, setItemsExpanded] = useState(true)
+  const [balanceExpanded, setBalanceExpanded] = useState(false)
+
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleDraft, setTitleDraft] = useState('')
-
-  // Date editing
   const [editingDate, setEditingDate] = useState(false)
   const [dateDraft, setDateDraft] = useState<Dayjs | null>(null)
 
@@ -54,6 +54,11 @@ export default function DetailsPage() {
         setReceipt(r)
         setTitleDraft(r.title)
         setDateDraft(dayjs(r.date ?? r.createdAt))
+        if (isBalanceReady(r)) {
+          setParticipantsExpanded(false)
+          setItemsExpanded(false)
+          setBalanceExpanded(true)
+        }
       }
     })
   }, [id, navigate])
@@ -66,7 +71,6 @@ export default function DetailsPage() {
     if (!editingDate && receipt) setDateDraft(dayjs(receipt.date ?? receipt.createdAt))
   }, [receipt?.date, receipt?.createdAt, editingDate])
 
-  // Auto-clear highlightErrors when all conditions met
   useEffect(() => {
     if (receipt && highlightErrors && isBalanceReady(receipt)) {
       setHighlightErrors(false)
@@ -102,25 +106,28 @@ export default function DetailsPage() {
     setEditingDate(false)
   }
 
-  function handleTabClick(tab: Tab) {
-    if (tab === 'balance' && !isBalanceReady(receipt!)) {
+  function handleBalanceToggle() {
+    if (!balanceExpanded && !isBalanceReady(receipt!)) {
       setHighlightErrors(true)
       if (!receipt!.paidBy) {
         showToast('Please set paid person', 'warning')
-      } else if (receipt!.items.length === 0) {
-        // no toast — empty items list is self-evident
-      } else {
+      } else if (receipt!.items.length > 0) {
         showToast("Please assign item's share", 'warning')
       }
       return
     }
-    setActiveTab(tab)
-    // Switching tabs unmounts ItemsSection, which resets its editingItemId state automatically
+    setBalanceExpanded(v => !v)
   }
 
   if (!receipt) return null
 
-  const balanceReady = isBalanceReady(receipt)
+  const itemsTotal = getTotalItemPrice(receipt);
+
+  const itemsSummary = getFormattedPrice(itemsTotal);
+
+  const balanceTotal = getFinalPrice(receipt);
+
+  const balanceSummary = getFormattedPrice(balanceTotal);
 
   const titleNode = editingTitle ? (
     <div className="details-title-edit">
@@ -223,7 +230,6 @@ export default function DetailsPage() {
       />
 
       <PageContent className="details-page-content">
-        {/* Date row */}
         <div className="details-date-row">
           {editingDate ? (
             <>
@@ -267,46 +273,31 @@ export default function DetailsPage() {
           )}
         </div>
 
-        {/* Always-visible participants */}
-        <ParticipantsSection receipt={receipt} onChange={handleChange} highlightErrors={highlightErrors} />
+        <CollapsibleSection
+          title="Participants"
+          expanded={participantsExpanded}
+          onToggle={() => setParticipantsExpanded(v => !v)}
+        >
+          <ParticipantsSection receipt={receipt} onChange={handleChange} highlightErrors={highlightErrors} />
+        </CollapsibleSection>
 
-        {/* Tab card */}
-        <div className="details-tab-card">
-          <div className="details-tab-bar">
-            {(['items', 'balance'] as Tab[]).map(tab => {
-              const isDisabled = tab === 'balance' && !balanceReady
-              return (
-                <button
-                  key={tab}
-                  className={[
-                    'details-tab-btn',
-                    activeTab === tab ? 'details-tab-btn--active' : '',
-                    isDisabled ? 'details-tab-btn--disabled' : '',
-                  ].filter(Boolean).join(' ')}
-                  onClick={() => handleTabClick(tab)}
-                  aria-disabled={isDisabled}
-                  tabIndex={isDisabled ? -1 : 0}
-                >
-                  {tab === 'items' ? 'Items' : 'Balance'}
-                </button>
-              )
-            })}
-          </div>
+        <CollapsibleSection
+          title="Items"
+          summary={itemsSummary}
+          expanded={itemsExpanded}
+          onToggle={() => setItemsExpanded(v => !v)}
+        >
+          <ItemsSection receipt={receipt} onChange={handleChange} highlightErrors={highlightErrors} />
+        </CollapsibleSection>
 
-          {/* Tab content */}
-          <div className="details-tab-content">
-            {activeTab === 'items' && (
-              <ItemsSection
-                receipt={receipt}
-                onChange={handleChange}
-                highlightErrors={highlightErrors}
-              />
-            )}
-            {activeTab === 'balance' && (
-              <BalanceTab receipt={receipt} onChange={handleChange} />
-            )}
-          </div>
-        </div>
+        <CollapsibleSection
+          title="Balance"
+          summary={balanceSummary}
+          expanded={balanceExpanded}
+          onToggle={handleBalanceToggle}
+        >
+          <BalanceSection receipt={receipt} onChange={handleChange} />
+        </CollapsibleSection>
       </PageContent>
     </div>
   )

@@ -2,11 +2,13 @@ import { nanoid } from 'nanoid'
 import type { Receipt, Settlement } from '../types'
 
 export function calculateSettlements(receipt: Receipt): Settlement[] {
-  const { items, paidBy, settlements: existing } = receipt
+  const { items, paidBy, settlements: existing, tax = 0, tips = 0 } = receipt
 
   if (!paidBy) return []
 
-  // Sum each non-payer's assigned cost across all items
+  const subtotal = items.reduce((sum, i) => sum + i.price, 0)
+  const multiplier = subtotal > 0 ? 1 + (tax + tips) / subtotal : 1
+
   const owedMap: Record<string, number> = {}
   for (const item of items) {
     for (const share of item.shares) {
@@ -26,7 +28,7 @@ export function calculateSettlements(receipt: Receipt): Settlement[] {
         id: prior?.id ?? nanoid(),
         fromPersonId: personId,
         toPersonId: paidBy,
-        amount: Math.round(amount * 100) / 100,
+        amount: Math.round(amount * multiplier * 100) / 100,
         amountPaid: prior?.amountPaid ?? 0,
       }
     })

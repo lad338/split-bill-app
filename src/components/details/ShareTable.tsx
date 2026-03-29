@@ -3,7 +3,8 @@ import Tooltip from '@mui/material/Tooltip'
 import TextField from '@mui/material/TextField'
 import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
-import PersonIcon from '@mui/icons-material/Person'
+import CheckBoxIcon from '@mui/icons-material/CheckBox'
+import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
 import { equalSplit } from '../../utils/shareUtils'
 import './ShareTable.css'
 import type { Person, ItemShare } from '../../types'
@@ -12,6 +13,7 @@ interface ShareTableProps {
   people: Person[]
   shares: ItemShare[]
   onChange: (shares: ItemShare[]) => void
+  onEqualSplit: () => void
 }
 
 interface ShareRowProps {
@@ -39,7 +41,10 @@ function ShareRow({ person, percentage, onUpdate, onSetFull, onToggle }: ShareRo
           onClick={() => onToggle(person.id)}
           className={isIncluded ? 'share-user-btn share-user-btn--included' : 'share-user-btn share-user-btn--excluded'}
         >
-          <PersonIcon sx={{ fontSize: 18 }} />
+          {isIncluded
+            ? <CheckBoxIcon sx={{ fontSize: 18 }} />
+            : <CheckBoxOutlineBlankIcon sx={{ fontSize: 18 }} />
+          }
         </IconButton>
       </Tooltip>
       <span className="share-name">{person.name}</span>
@@ -86,7 +91,7 @@ function ShareRow({ person, percentage, onUpdate, onSetFull, onToggle }: ShareRo
   )
 }
 
-export default function ShareTable({ people, shares, onChange }: ShareTableProps) {
+export default function ShareTable({ people, shares, onChange, onEqualSplit }: ShareTableProps) {
   function pct(personId: string): number {
     return shares.find(s => s.personId === personId)?.percentage ?? 0
   }
@@ -148,8 +153,15 @@ export default function ShareTable({ people, shares, onChange }: ShareTableProps
           onToggle={toggle}
         />
       ))}
-
       <div className="share-total-row">
+        <button
+          className="share-equally-split-btn"
+          onClick={onEqualSplit}
+          disabled={people.length === 0}
+          aria-label="Equally split"
+        >
+          Equally split
+        </button>
         <span className={`share-total${Math.abs(total - 100) > 0.01 ? ' share-total--error' : ''}`}>
           Total: {total.toFixed(2)}%
         </span>

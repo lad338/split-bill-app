@@ -78,4 +78,31 @@ describe('calculateSettlements', () => {
     const result = calculateSettlements(receipt)
     expect(result[0].amountPaid).toBe(15)
   })
+
+  it('applies tax and tips multiplier proportionally', () => {
+    // subtotal=100, multiplier = 1 + 10/100 + 15/100 = 1.25 → alice owes 50 * 1.25 = 62.50
+    const receipt = makeReceipt({
+      items: [{ id: 'i1', name: 'Dinner', price: 100, shares: [{ personId: 'alice', percentage: 50 }, { personId: 'bob', percentage: 50 }] }],
+      tax: 10,
+      tips: 15,
+    })
+    const result = calculateSettlements(receipt)
+    expect(result).toHaveLength(1)
+    expect(result[0].amount).toBe(62.5)
+  })
+
+  it('applies only tax when tips is absent', () => {
+    // subtotal=100, multiplier = 1.20 → alice owes 60
+    const receipt = makeReceipt({
+      items: [{ id: 'i1', name: 'Dinner', price: 100, shares: [{ personId: 'alice', percentage: 50 }, { personId: 'bob', percentage: 50 }] }],
+      tax: 20,
+    })
+    const result = calculateSettlements(receipt)
+    expect(result[0].amount).toBe(60)
+  })
+
+  it('does not divide by zero when subtotal is 0', () => {
+    const receipt = makeReceipt({ items: [], tax: 10, tips: 5 })
+    expect(calculateSettlements(receipt)).toEqual([])
+  })
 })

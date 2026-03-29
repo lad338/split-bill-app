@@ -83,7 +83,7 @@ describe('analyzeWithGemini', () => {
   it('throws when the response text is empty', async () => {
     makeAI('')
     await expect(analyzeWithGemini('data:image/jpeg;base64,abc')).rejects.toThrow(
-      'Failed to parse AI response'
+      'No text in AI response'
     )
   })
 

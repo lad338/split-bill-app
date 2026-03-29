@@ -3,11 +3,6 @@
   flex-direction: column;
 }
 
-.items-section .item-row {
-  padding-left: var(--spacing-4);
-  padding-right: var(--spacing-4);
-}
-
 @keyframes expandRow {
   from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }

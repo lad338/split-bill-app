@@ -1,9 +1,10 @@
 .details-page-content {
   flex: 1 1 0;
-  overflow: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Editable title in header */
 .details-title-btn {
   cursor: pointer;
   border-radius: var(--radius-small);
@@ -23,7 +24,6 @@
   min-width: 0;
 }
 
-/* Inline delete confirmation in header */
 .details-delete-confirm {
   display: flex;
   align-items: center;
@@ -36,61 +36,9 @@
   white-space: nowrap;
 }
 
-/* Date row */
 .details-date-row {
   display: flex;
   align-items: start;
   gap: var(--spacing-2);
   min-height: 32px;
-}
-
-/* Tab card */
-.details-tab-card {
-  background: var(--color-bg-surface);
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-medium);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 0;
-  min-height: 0;
-}
-
-/* Tab bar */
-.details-tab-bar {
-  display: flex;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.details-tab-btn {
-  flex: 1;
-  padding: 12px 0;
-  font-weight: 500;
-  color: var(--color-text-muted);
-  border-bottom: 2px solid transparent;
-  margin-bottom: -1px;
-  transition: color 0.15s;
-  text-align: center;
-}
-
-.details-tab-btn:hover:not(.details-tab-btn--disabled) {
-  color: var(--color-text);
-}
-
-.details-tab-btn--active {
-  color: var(--color-accent);
-  border-bottom-color: var(--color-accent);
-}
-
-.details-tab-btn--disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.details-tab-content {
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  min-height: 0;
 }

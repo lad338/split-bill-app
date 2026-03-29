@@ -1,0 +1,23 @@
+.balance-section {
+  padding: 0;
+}
+
+.balance-section-error {
+  text-align: center;
+  color: var(--color-text-danger);
+  padding: var(--spacing-6) var(--spacing-4);
+  font-size: var(--font-size-base);
+}
+
+.balance-section-empty {
+  text-align: center;
+  color: var(--color-text-subtle);
+  padding: var(--spacing-6) 0;
+}
+
+.balance-section-inputs {
+  display: flex;
+  gap: var(--spacing-4);
+  padding: var(--spacing-3) var(--spacing-4);
+  border-bottom: 1px solid var(--color-border-subtle);
+}

@@ -62,7 +62,7 @@ export default function ParticipantsSection({ receipt, onChange, highlightErrors
         onAddName={addName}
       />
       <FormControl variant="standard" fullWidth>
-        <InputLabel className="participants-who-paid-label" sx={{ '&.MuiInputLabel-root': { color: whoPaidError ? 'var(--color-text-danger)' : 'var(--color-text-muted)', fontFamily: 'inherit', transition: 'color 0.15s' } }}>
+        <InputLabel className={`participants-who-paid-label${whoPaidError ? ' participants-who-paid-label--error' : ''}`} sx={{ '&.MuiInputLabel-root': { color: whoPaidError ? 'var(--color-text-danger)' : 'var(--color-text-muted)', fontFamily: 'inherit', transition: 'color 0.15s' } }}>
           Who paid in full
         </InputLabel>
         <Select

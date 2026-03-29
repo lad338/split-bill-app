@@ -32,6 +32,8 @@ export interface Receipt {
   imageData?: string       // base64 encoded source image; session-only, never persisted
   deletedAt?: number       // Unix ms; set on soft delete, undefined = active
   paidBy?: string          // personId of whoever paid the full receipt; undefined if not yet set
+  tax?: number              // dollar amount added to bill; default 0
+  tips?: number             // dollar amount added to bill; default 0
   people: Person[]
   items: ReceiptItem[]
   settlements: Settlement[]

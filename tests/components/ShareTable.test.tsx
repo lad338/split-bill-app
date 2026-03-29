@@ -12,7 +12,7 @@ const people: Person[] = [
 
 describe('ShareTable', () => {
   it('renders a row for each person', () => {
-    render(<ShareTable people={people} shares={[]} onChange={() => {}} />)
+    render(<ShareTable people={people} shares={[]} onChange={() => {}} onEqualSplit={() => {}} />)
     expect(screen.getByText('Alice')).toBeInTheDocument()
     expect(screen.getByText('Bob')).toBeInTheDocument()
     expect(screen.getByText('Carol')).toBeInTheDocument()
@@ -20,13 +20,13 @@ describe('ShareTable', () => {
 
   it('shows % input for included participants', () => {
     const shares: ItemShare[] = [{ personId: 'alice', percentage: 70 }]
-    render(<ShareTable people={people} shares={shares} onChange={() => {}} />)
+    render(<ShareTable people={people} shares={shares} onChange={() => {}} onEqualSplit={() => {}} />)
     expect(screen.getByDisplayValue('70')).toBeInTheDocument()
   })
 
   it('shows 0% for people not in shares', () => {
     const shares: ItemShare[] = [{ personId: 'alice', percentage: 100 }]
-    render(<ShareTable people={people} shares={shares} onChange={() => {}} />)
+    render(<ShareTable people={people} shares={shares} onChange={() => {}} onEqualSplit={() => {}} />)
     // All 3 people always show inputs; Bob and Carol default to 0
     expect(screen.getAllByRole('textbox').length).toBe(3)
     expect(screen.getAllByDisplayValue('0').length).toBe(2)
@@ -35,7 +35,7 @@ describe('ShareTable', () => {
   it('calls onChange when user updates a percentage', async () => {
     const onChange = vi.fn()
     const shares: ItemShare[] = [{ personId: 'alice', percentage: 50 }]
-    render(<ShareTable people={people} shares={shares} onChange={onChange} />)
+    render(<ShareTable people={people} shares={shares} onChange={onChange} onEqualSplit={() => {}} />)
     const input = screen.getByDisplayValue('50')
     await userEvent.clear(input)
     await userEvent.type(input, '60')
@@ -49,8 +49,8 @@ describe('ShareTable', () => {
       { personId: 'alice', percentage: 60 },
       { personId: 'bob', percentage: 40 },
     ]
-    render(<ShareTable people={people} shares={shares} onChange={() => {}} />)
-    expect(screen.getByText(/100%/)).toBeInTheDocument()
+    render(<ShareTable people={people} shares={shares} onChange={() => {}} onEqualSplit={() => {}} />)
+    expect(screen.getByText('Total: 100.00%')).toBeInTheDocument()
   })
 
   it('total line has error styling when total ≠ 100', () => {
@@ -58,7 +58,7 @@ describe('ShareTable', () => {
       { personId: 'alice', percentage: 60 },
       { personId: 'bob', percentage: 60 },
     ]
-    const { container } = render(<ShareTable people={people} shares={shares} onChange={() => {}} />)
+    const { container } = render(<ShareTable people={people} shares={shares} onChange={() => {}} onEqualSplit={() => {}} />)
     const totalEl = container.querySelector('.share-total')
     expect(totalEl?.classList.contains('share-total--error')).toBe(true)
   })
@@ -69,7 +69,7 @@ describe('ShareTable', () => {
       { personId: 'alice', percentage: 50 },
       { personId: 'bob', percentage: 50 },
     ]
-    render(<ShareTable people={people} shares={shares} onChange={onChange} />)
+    render(<ShareTable people={people} shares={shares} onChange={onChange} onEqualSplit={() => {}} />)
     await userEvent.click(screen.getByRole('button', { name: /exclude alice/i }))
     const result: ItemShare[] = onChange.mock.calls[0][0]
     expect(result.find(s => s.personId === 'alice')?.percentage).toBe(0)
@@ -83,10 +83,22 @@ describe('ShareTable', () => {
       { personId: 'alice', percentage: 50 },
       { personId: 'bob', percentage: 50 },
     ]
-    render(<ShareTable people={people} shares={shares} onChange={onChange} />)
+    render(<ShareTable people={people} shares={shares} onChange={onChange} onEqualSplit={() => {}} />)
     await userEvent.click(screen.getByRole('button', { name: /alice 100%/i }))
     const result: ItemShare[] = onChange.mock.calls[0][0]
     expect(result.find(s => s.personId === 'alice')?.percentage).toBe(100)
     expect(result.find(s => s.personId === 'bob')?.percentage).toBe(0)
+  })
+
+  it('calls onEqualSplit when Equally split button is clicked', async () => {
+    const onEqualSplit = vi.fn()
+    render(<ShareTable people={people} shares={[]} onChange={() => {}} onEqualSplit={onEqualSplit} />)
+    await userEvent.click(screen.getByRole('button', { name: /equally split/i }))
+    expect(onEqualSplit).toHaveBeenCalled()
+  })
+
+  it('Equally split button is disabled when people list is empty', () => {
+    render(<ShareTable people={[]} shares={[]} onChange={() => {}} onEqualSplit={() => {}} />)
+    expect(screen.getByRole('button', { name: /equally split/i })).toBeDisabled()
   })
 })
