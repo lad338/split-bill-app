@@ -1,0 +1,6 @@
+.share-panel {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+  padding: var(--space-sm) 0;
+}

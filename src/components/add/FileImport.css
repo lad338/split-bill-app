@@ -1,0 +1,43 @@
+.file-import {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.file-import-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 32px;
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-medium);
+  cursor: pointer;
+  background: var(--color-bg-container);
+  transition: border-color 0.15s;
+}
+
+.file-import-label:hover {
+  border-color: var(--color-border-focus);
+}
+
+.file-import-icon {
+  font-size: 2.5rem;
+}
+
+.file-import-text {
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+/* Camera option: only show on touch devices */
+.file-import-camera {
+  display: none;
+}
+
+@media (pointer: coarse) {
+  .file-import-camera {
+    display: flex;
+  }
+}

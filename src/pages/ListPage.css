@@ -1,0 +1,11 @@
+.list-receipts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.list-empty {
+  text-align: center;
+  color: var(--color-text-subtle);
+  padding: 48px 0;
+}

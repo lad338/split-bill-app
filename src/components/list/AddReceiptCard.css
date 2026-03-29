@@ -1,0 +1,23 @@
+.add-receipt-card {
+  width: 100%;
+  background: var(--color-bg-container);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-medium);
+  padding: 20px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-2);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.add-receipt-card:hover {
+  border-color: var(--color-border-focus);
+}
+
+.add-receipt-label {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+}

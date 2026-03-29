@@ -1,0 +1,12 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <script>
+      // Single-page app redirect for GitHub Pages
+      // Saves the original URL to sessionStorage, then redirects to the app root
+      sessionStorage.redirect = location.href;
+      location.replace('/split-bill-app/');
+    </script>
+  </head>
+</html>

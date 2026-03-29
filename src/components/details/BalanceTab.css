@@ -1,0 +1,9 @@
+.balance-tab {
+  padding: 0;
+}
+
+.balance-tab-empty {
+  text-align: center;
+  color: var(--color-text-subtle);
+  padding: var(--spacing-6) 0;
+}

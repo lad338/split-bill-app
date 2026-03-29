@@ -1,0 +1,97 @@
+.item-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.item-row:last-child { border-bottom: none; }
+
+.item-row--expanded {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding: 12px 0 8px;
+}
+
+.item-row-expand-body {
+  animation: expandRow 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+@keyframes expandRow {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.item-row-name {
+  flex: 1;
+  font-weight: 500;
+  color: var(--color-text);
+  min-width: 0;
+}
+
+.item-row-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.item-row-price {
+  font-weight: 500;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.item-row-expand-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.item-name-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--color-border);
+  outline: none;
+  color: var(--color-text);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  padding: 4px 0;
+}
+
+.item-name-input:focus { border-bottom-color: var(--color-accent); }
+
+.item-row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-row-actions--confirm {
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.item-row-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.item-delete-confirm-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.item-icon-btn { color: var(--color-text-muted) !important; }
+.item-icon-btn:hover { background: var(--color-btn-hover) !important; color: var(--color-text) !important; }
+.item-icon-btn--danger:hover { color: var(--color-text-danger) !important; }
+.item-icon-btn--save:not(:disabled) { color: var(--color-text-success) !important; }
+.item-icon-btn:disabled { opacity: 0.35; }

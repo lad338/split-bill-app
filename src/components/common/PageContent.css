@@ -1,0 +1,11 @@
+.page-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+  padding: var(--spacing-3) var(--spacing-4) var(--spacing-4);
+}
+
+.page-content--scrollable {
+  flex: 1 1 0;
+  overflow-y: auto;
+}

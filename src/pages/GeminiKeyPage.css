@@ -1,0 +1,20 @@
+.gemini-key-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-3);
+}
+
+.gemini-key-hint {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.gemini-key-link {
+  color: var(--color-text-accent);
+  text-decoration: none;
+}
+
+.gemini-key-link:hover {
+  text-decoration: underline;
+}

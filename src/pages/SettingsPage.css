@@ -1,0 +1,70 @@
+.settings-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-action-row {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.settings-delete-box {
+  border: 1px solid var(--color-text-danger);
+  border-radius: var(--radius-small);
+  overflow: hidden;
+}
+
+.settings-delete-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-2) var(--spacing-4);
+  min-height: 36px;
+  color: var(--color-text-danger);
+  font-size: var(--font-size-base);
+  font-weight: var(--font-weight-semibold);
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s;
+  width: 100%;
+}
+
+.settings-delete-btn:hover {
+  background: rgba(248, 81, 73, 0.08);
+}
+
+.settings-delete-btn:active {
+  background: rgba(248, 81, 73, 0.12);
+}
+
+@keyframes settingsExpandRow {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.settings-confirm-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 2px 8px;
+  border-top: 1px solid var(--color-border-subtle);
+  animation: settingsExpandRow 0.15s ease-out;
+}
+
+.settings-confirm-label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.settings-icon-btn { color: var(--color-text-muted) !important; }
+.settings-icon-btn:hover { background: var(--color-btn-hover) !important; color: var(--color-text) !important; }
+.settings-icon-btn--danger:hover { color: var(--color-text-danger) !important; }
+
+.settings-feedback {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+}
