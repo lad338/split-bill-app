@@ -82,7 +82,7 @@ export default function GeminiKeyPage() {
                 </IconButton>
               </InputAdornment>
             }
-            sx={{ fontFamily: 'monospace', fontSize: 'var(--font-size-sm)' }}
+            sx={{ fontFamily: 'monospace', fontSize: 'var(--font-size-base)' }}
           />
 
           <Button
