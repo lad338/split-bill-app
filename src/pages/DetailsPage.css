@@ -3,6 +3,7 @@
   overflow-y: auto;
   display: flex;
   flex-direction: column;
+  padding-bottom: max(30dvh, env(safe-area-inset-bottom, 0px) + 1.5rem);
 }
 
 .details-title-btn {

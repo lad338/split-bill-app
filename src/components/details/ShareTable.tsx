@@ -14,6 +14,7 @@ interface ShareTableProps {
   shares: ItemShare[]
   onChange: (shares: ItemShare[]) => void
   onEqualSplit: () => void
+  manualResetKey?: number
 }
 
 interface ShareRowProps {
@@ -22,6 +23,28 @@ interface ShareRowProps {
   onUpdate: (personId: string, value: number) => void
   onSetFull: (personId: string) => void
   onToggle: (personId: string) => void
+}
+
+function redistributeAuto(
+  shares: ItemShare[],
+  manuallySet: Set<string>,
+  people: Person[]
+): ItemShare[] {
+  const manualSum = [...manuallySet].reduce(
+    (sum, id) => sum + (shares.find(s => s.personId === id)?.percentage ?? 0),
+    0
+  )
+  const remaining = 100 - manualSum
+  const autoActive = people.filter(
+    p => !manuallySet.has(p.id) && (shares.find(s => s.personId === p.id)?.percentage ?? 0) > 0
+  )
+  const autoShare = autoActive.length > 0 ? Math.max(0, remaining) / autoActive.length : 0
+  return people.map(p => {
+    if (manuallySet.has(p.id))
+      return { personId: p.id, percentage: shares.find(s => s.personId === p.id)?.percentage ?? 0 }
+    const isActive = (shares.find(s => s.personId === p.id)?.percentage ?? 0) > 0
+    return { personId: p.id, percentage: isActive ? autoShare : 0 }
+  })
 }
 
 function ShareRow({ person, percentage, onUpdate, onSetFull, onToggle }: ShareRowProps) {
@@ -91,7 +114,13 @@ function ShareRow({ person, percentage, onUpdate, onSetFull, onToggle }: ShareRo
   )
 }
 
-export default function ShareTable({ people, shares, onChange, onEqualSplit }: ShareTableProps) {
+export default function ShareTable({ people, shares, onChange, onEqualSplit, manualResetKey }: ShareTableProps) {
+  const [manuallySet, setManuallySet] = useState<Set<string>>(new Set())
+
+  useEffect(() => {
+    setManuallySet(new Set())
+  }, [manualResetKey])
+
   function pct(personId: string): number {
     return shares.find(s => s.personId === personId)?.percentage ?? 0
   }
@@ -103,40 +132,35 @@ export default function ShareTable({ people, shares, onChange, onEqualSplit }: S
   const total = people.reduce((sum, p) => sum + pct(p.id), 0)
 
   function updatePercentage(personId: string, value: number) {
-    onChange(allShares().map(s => s.personId === personId ? { ...s, percentage: value } : s))
+    const newManuallySet = new Set([...manuallySet, personId])
+    setManuallySet(newManuallySet)
+    const updatedShares = allShares().map(s => s.personId === personId ? { ...s, percentage: value } : s)
+    onChange(redistributeAuto(updatedShares, newManuallySet, people))
   }
 
   function setFull(personId: string) {
-    onChange(allShares().map(s => ({ ...s, percentage: s.personId === personId ? 100 : 0 })))
+    const newManuallySet = new Set([...manuallySet, personId])
+    setManuallySet(newManuallySet)
+    const updatedShares = allShares().map(s => s.personId === personId ? { ...s, percentage: 100 } : s)
+    onChange(redistributeAuto(updatedShares, newManuallySet, people))
   }
 
   function exclude(personId: string) {
-    const current = allShares()
-    const active = current.filter(s => s.personId !== personId && s.percentage > 0)
-    const splits = equalSplit(active.length)
-    let idx = 0
-    onChange(current.map(s => {
-      if (s.personId === personId) return { ...s, percentage: 0 }
-      if (s.percentage > 0) return { ...s, percentage: splits[idx++] }
-      return s
-    }))
+    const newManuallySet = new Set(manuallySet)
+    newManuallySet.delete(personId)
+    setManuallySet(newManuallySet)
+    const updatedShares = allShares().map(s => s.personId === personId ? { ...s, percentage: 0 } : s)
+    onChange(redistributeAuto(updatedShares, newManuallySet, people))
   }
 
   function include(personId: string) {
-    const current = allShares()
-    const activeIds = new Set(
-      current.filter(s => s.percentage > 0 || s.personId === personId).map(s => s.personId)
-    )
-    const splits = equalSplit(activeIds.size)
-    let idx = 0
-    onChange(current.map(s =>
-      activeIds.has(s.personId) ? { ...s, percentage: splits[idx++] } : s
-    ))
+    // Set placeholder pct > 0 to join the auto pool; person is NOT manually set
+    const updatedShares = allShares().map(s => s.personId === personId ? { ...s, percentage: 1 } : s)
+    onChange(redistributeAuto(updatedShares, manuallySet, people))
   }
 
   function toggle(personId: string) {
-    const current = allShares()
-    const isIncluded = (current.find(s => s.personId === personId)?.percentage ?? 0) > 0
+    const isIncluded = pct(personId) > 0
     if (isIncluded) exclude(personId)
     else include(personId)
   }

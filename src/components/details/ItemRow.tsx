@@ -31,6 +31,7 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
   const [draft, setDraft] = useState(item)
   const [priceStr, setPriceStr] = useState('')
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [manualResetKey, setManualResetKey] = useState(0)
 
   const total = people.reduce((sum, p) => sum + (draft.shares.find(s => s.personId === p.id)?.percentage ?? 0), 0)
   const canSave = Math.abs(total - 100) < 0.01 && parseFloat(priceStr) > 0
@@ -56,24 +57,24 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
   }
 
   function handleCollapse() {
-    if (!canSave) {
-      showToast('Update price and shares before closing', 'warning')
-      return
+    if (canSave) {
+      onChange({ ...draft, price: parseFloat(priceStr) })
+      showToast('Changes saved')
     }
-    onChange({ ...draft, price: parseFloat(priceStr) })
     setIsExpanded(false)
     onEditEnd()
-    showToast('Changes saved')
   }
 
   function handleReset() {
     setDraft(item)
     setPriceStr(getFormattedPrice(item.price) || '')
+    setManualResetKey(k => k + 1)
   }
 
   function handleEqualSplit() {
     const splits = equalSplit(people.length)
     setDraft({ ...draft, shares: people.map((p, i) => ({ personId: p.id, percentage: splits[i] })) })
+    setManualResetKey(k => k + 1)
   }
 
   const anotherIsEditing = editingItemId !== null && editingItemId !== item.id
@@ -144,6 +145,7 @@ export default function ItemRow({ item, people, onChange, onDelete, editingItemI
           shares={draft.shares}
           onChange={shares => setDraft({ ...draft, shares })}
           onEqualSplit={handleEqualSplit}
+          manualResetKey={manualResetKey}
         />
 
         {showDeleteConfirm ? (
