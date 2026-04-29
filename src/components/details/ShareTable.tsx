@@ -5,7 +5,6 @@ import InputAdornment from '@mui/material/InputAdornment'
 import IconButton from '@mui/material/IconButton'
 import CheckBoxIcon from '@mui/icons-material/CheckBox'
 import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
-import { equalSplit } from '../../utils/shareUtils'
 import './ShareTable.css'
 import type { Person, ItemShare } from '../../types'
 
